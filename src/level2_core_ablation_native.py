@@ -103,8 +103,8 @@ def run_level2():
         recording_hooks.clear()
 
     # Testing
-    N_TEST = 20
-    test_prompts = get_harmful_prompts(100)[50:50+N_TEST]
+    N_TEST = 200
+    test_prompts = get_harmful_prompts(1000)[500:500+N_TEST]
     fmt_prompts = [apply_chat_template(tokenizer, p) for p in test_prompts]
     
     results = {"baseline": {}, "ablated": {}}

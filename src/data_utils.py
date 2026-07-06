@@ -53,54 +53,25 @@ DUMMY_HARMLESS = [
     "How to play the guitar"
 ]
 
-def get_harmful_prompts(n=100):
+def get_harmful_prompts(n=1000):
     cache_file = os.path.join(DATA_DIR, 'harmful_prompts.json')
     if os.path.exists(cache_file):
-        with open(cache_file, 'r') as f:
+        with open(cache_file, 'r', encoding='utf-8') as f:
             prompts = json.load(f)
-            if len(prompts) >= n:
-                return prompts[:n]
-    
-    try:
-        ds = load_dataset('walledai/AdvBench', split='train')
-        prompts = ds['prompt']
-        random.shuffle(prompts)
-        selected = prompts[:n]
-        with open(cache_file, 'w') as f:
-            json.dump(selected, f, indent=2)
-        return selected
-    except Exception as e:
-        print(f"Could not load AdvBench from HF: {e}. Generating dummy harmful prompts.")
-        selected = (DUMMY_HARMFUL * ((n // len(DUMMY_HARMFUL)) + 1))[:n]
-        # Append index to ensure they are slightly unique if we repeat
-        selected = [f"{p} ({i})" for i, p in enumerate(selected)]
-        with open(cache_file, 'w') as f:
-            json.dump(selected, f, indent=2)
-        return selected
+            random.shuffle(prompts)
+            return prompts[:n] if len(prompts) >= n else prompts
+    print("Warning: harmful_prompts.json not found.")
+    return []
 
-def get_harmless_prompts(n=100):
+def get_harmless_prompts(n=1000):
     cache_file = os.path.join(DATA_DIR, 'harmless_prompts.json')
     if os.path.exists(cache_file):
-        with open(cache_file, 'r') as f:
+        with open(cache_file, 'r', encoding='utf-8') as f:
             prompts = json.load(f)
-            if len(prompts) >= n:
-                return prompts[:n]
-                
-    try:
-        ds = load_dataset('tatsu-lab/alpaca', split='train')
-        prompts = [item['instruction'] for item in ds]
-        random.shuffle(prompts)
-        selected = prompts[:n]
-        with open(cache_file, 'w') as f:
-            json.dump(selected, f, indent=2)
-        return selected
-    except Exception as e:
-        print(f"Could not load Alpaca from HF: {e}. Generating dummy harmless prompts.")
-        selected = (DUMMY_HARMLESS * ((n // len(DUMMY_HARMLESS)) + 1))[:n]
-        selected = [f"{p} ({i})" for i, p in enumerate(selected)]
-        with open(cache_file, 'w') as f:
-            json.dump(selected, f, indent=2)
-        return selected
+            random.shuffle(prompts)
+            return prompts[:n] if len(prompts) >= n else prompts
+    print("Warning: harmless_prompts.json not found.")
+    return []
 
 def apply_chat_template(tokenizer, prompt):
     if hasattr(tokenizer, "apply_chat_template"):

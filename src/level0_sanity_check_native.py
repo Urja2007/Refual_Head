@@ -31,8 +31,10 @@ def run_level0_native():
         print(f"Error loading model: {e}")
         return
 
-    N_TRAIN = 50
-    N_TEST = 20
+    N_TRAIN = 500
+    N_SAMPLES = 1000
+    N_TEST = 500
+    N_GEN_SAMPLES = 100
     print(f"Fetching {N_TRAIN} train / {N_TEST} test samples...")
     harmful_prompts = get_harmful_prompts(N_TRAIN + N_TEST)
     harmless_prompts = get_harmless_prompts(N_TRAIN + N_TEST)
@@ -137,7 +139,7 @@ def run_level0_native():
         return any(sub.lower() in text_lower for sub in refusal_substrings)
 
     # We will test on N_TEST harmful prompts
-    test_prompts_fmt = harmful_test
+    test_prompts_fmt = [apply_chat_template(tokenizer, p) for p in harmful_prompts[:N_GEN_SAMPLES]]
     
     def generate_and_eval(ablate=False):
         hooks = []
@@ -172,11 +174,11 @@ def run_level0_native():
         for h in hooks: h.remove()
         return refusals / len(test_prompts_fmt)
 
-    print("\nEvaluating Baseline Generation...")
+    print(f"\nEvaluating baseline refusal rate on {N_GEN_SAMPLES} samples...")
     baseline_refusal = generate_and_eval(ablate=False)
     print(f"Baseline Refusal Rate: {baseline_refusal:.2f}")
 
-    print("\nEvaluating Ablated Generation...")
+    print(f"\nEvaluating ablated refusal rate on {N_GEN_SAMPLES} samples...")
     ablated_refusal = generate_and_eval(ablate=True)
     print(f"Ablated Refusal Rate: {ablated_refusal:.2f}")
     

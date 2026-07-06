@@ -29,8 +29,8 @@ def run_level4():
     # Part 1: Extract h_hat (Harmfulness Vector) from Layer 5
     # ---------------------------------------------------------
     print("Extracting h_hat from Layer 5...")
-    harmful = get_harmful_prompts(50)
-    harmless = get_harmless_prompts(50)
+    harmful = get_harmful_prompts(500)
+    harmless = get_harmless_prompts(500)
     
     harmful_fmt = [apply_chat_template(tokenizer, p) for p in harmful]
     harmless_fmt = [apply_chat_template(tokenizer, p) for p in harmless]
@@ -56,9 +56,9 @@ def run_level4():
     hook_handle.remove()
     
     # Calculate means
-    all_acts = torch.cat(layer_5_activations, dim=0) # (100, 4096)
-    harmful_mean = all_acts[:50].mean(dim=0)
-    harmless_mean = all_acts[50:].mean(dim=0)
+    all_acts = torch.cat(layer_5_activations, dim=0) # (1000, 4096)
+    harmful_mean = all_acts[:500].mean(dim=0)
+    harmless_mean = all_acts[500:].mean(dim=0)
     
     h_hat = harmful_mean - harmless_mean
     h_hat_norm = h_hat / torch.norm(h_hat)

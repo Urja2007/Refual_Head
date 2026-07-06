@@ -1,6 +1,6 @@
 {
-  "baseline": 1.0,
-  "control_random_heads": 1.0,
-  "control_outside_band": 1.0,
-  "directional_ablation": 0.8
+  "baseline": 0.975,
+  "control_random_heads": 0.945,
+  "control_outside_band": 0.975,
+  "directional_ablation": 0.705
 }

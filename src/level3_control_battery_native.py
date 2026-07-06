@@ -110,8 +110,8 @@ def run_level3():
             active_hooks.append(h)
 
     # Testing
-    N_TEST = 20
-    test_prompts = get_harmful_prompts(100)[50:50+N_TEST]
+    N_TEST = 200
+    test_prompts = get_harmful_prompts(1000)[500:500+N_TEST]
     fmt_prompts = [apply_chat_template(tokenizer, p) for p in test_prompts]
     
     modes = {
