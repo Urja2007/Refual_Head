@@ -1,0 +1,9 @@
+torch
+transformer_lens
+datasets
+einops
+plotly
+pandas
+scikit-learn
+kaleido
+ipywidgets
