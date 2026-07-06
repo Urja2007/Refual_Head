@@ -30,7 +30,7 @@ def run_level1_native():
         
     r_hat = torch.load(r_hat_path).to(torch.float16).to(model.device)
     
-    N_SAMPLES = 50
+    N_SAMPLES = 100
     print(f"Fetching {N_SAMPLES} samples for Level 1...")
     harmful_prompts = get_harmful_prompts(N_SAMPLES)
     harmless_prompts = get_harmless_prompts(N_SAMPLES)

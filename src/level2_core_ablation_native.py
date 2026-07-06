@@ -108,6 +108,8 @@ def run_level2():
     fmt_prompts = [apply_chat_template(tokenizer, p) for p in test_prompts]
     
     results = {"baseline": {}, "ablated": {}}
+    generations_log = {"baseline": [], "ablated": []}
+    final_layer_hs = {}
     
     for mode in ["baseline", "ablated"]:
         print(f"\n--- Running {mode.upper()} ---")
@@ -118,6 +120,7 @@ def run_level2():
             
         enable_recording()
         refusals = 0
+        hs_list = []
         
         batch_size = 4
         for i in tqdm(range(0, len(fmt_prompts), batch_size)):
@@ -126,7 +129,11 @@ def run_level2():
             
             with torch.no_grad():
                 # Forward pass for recording
-                model(**inputs)
+                out_base = model(**inputs, output_hidden_states=True)
+                # output_hidden_states[-1] is after the final layer normalization in Llama, but we can just get the final layer
+                # Wait, output_hidden_states returns all layers.
+                last_hidden = out_base.hidden_states[-1][:, -1, :].detach().cpu()
+                hs_list.append(last_hidden)
                 
                 # Generation pass
                 disable_recording() # Don't record during generation tokens
@@ -135,10 +142,13 @@ def run_level2():
                 
             for j, out_tokens in enumerate(out):
                 gen_text = tokenizer.decode(out_tokens[inputs.input_ids.shape[1]:], skip_special_tokens=True).strip()
+                generations_log[mode].append({"prompt": test_prompts[i+j], "generation": gen_text})
                 if is_refusal(gen_text):
                     refusals += 1
                     
         disable_recording()
+        
+        final_layer_hs[mode] = torch.cat(hs_list, dim=0)
         
         # Average layer projections across all samples
         avg_projections = {l: sum(layer_projections[l])/len(layer_projections[l]) for l in range(num_layers)}
@@ -150,11 +160,25 @@ def run_level2():
         
     disable_ablation()
     
+    # Cosine Similarity Sanity Check
+    import torch.nn.functional as F
+    cos_sims = F.cosine_similarity(final_layer_hs['baseline'], final_layer_hs['ablated'], dim=-1)
+    mean_cos_sim = cos_sims.mean().item()
+    print(f"\n--- Sanity Check ---")
+    print(f"Mean Cosine Similarity between Baseline and Ablated final hidden states: {mean_cos_sim:.4f}")
+    if mean_cos_sim > 0.9999:
+        print("WARNING: Cosine similarity is effectively 1.0! The ablation hook did not alter the forward pass!")
+    else:
+        print("Success: The ablation hook successfully altered the forward pass.")
+    results['sanity_check_cos_sim'] = mean_cos_sim
+    
     results_dir = os.path.join(base_dir, 'results')
     os.makedirs(results_dir, exist_ok=True)
     with open(os.path.join(results_dir, 'level2_core_ablation.json'), 'w') as f:
         json.dump(results, f, indent=2)
-    print("\nSaved Level 2 results to results/level2_core_ablation.json")
+    with open(os.path.join(results_dir, 'level2_generations.json'), 'w') as f:
+        json.dump(generations_log, f, indent=2)
+    print("\nSaved Level 2 results and generation logs to results/")
 
 if __name__ == "__main__":
     run_level2()
