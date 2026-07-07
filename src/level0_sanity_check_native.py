@@ -1,7 +1,6 @@
 import sys
 import os
 import json
-os.environ["HF_HUB_OFFLINE"] = "1"
 
 print("Importing torch...")
 import torch
@@ -17,7 +16,7 @@ from data_utils import get_harmful_prompts, get_harmless_prompts, apply_chat_tem
 def run_level0_native():
     print("Loading Llama-3-8B-Instruct natively...")
     try:
-        model_name = "meta-llama/Meta-Llama-3-8B-Instruct"
+        model_name = os.environ.get("TARGET_MODEL", "meta-llama/Meta-Llama-3-8B-Instruct")
         tokenizer = AutoTokenizer.from_pretrained(model_name)
         tokenizer.pad_token = tokenizer.eos_token
         
@@ -29,7 +28,7 @@ def run_level0_native():
         print("Model loaded successfully!")
     except Exception as e:
         print(f"Error loading model: {e}")
-        return
+        raise e
 
     N_TRAIN = 500
     N_SAMPLES = 1000
@@ -121,7 +120,7 @@ def run_level0_native():
     print(f"\nBest layer for refusal direction: {best_layer} (Score: {best_score:.4f})")
     
     # Save the best r_hat
-    models_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'models')
+    models_dir = os.path.join(os.environ.get('OUTPUT_DIR', os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'models')
     os.makedirs(models_dir, exist_ok=True)
     save_path = os.path.join(models_dir, 'r_hat_level0.pt')
     torch.save(best_r_hat, save_path)
@@ -186,7 +185,7 @@ def run_level0_native():
     results['ablated_refusal_rate'] = ablated_refusal
 
     # Save results to JSON
-    results_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'results')
+    results_dir = os.path.join(os.environ.get('OUTPUT_DIR', os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'results')
     os.makedirs(results_dir, exist_ok=True)
     with open(os.path.join(results_dir, 'level0_sanity_check.json'), 'w') as f:
         json.dump(results, f, indent=2)

@@ -1,7 +1,6 @@
 print("Starting script execution...")
 import sys
 import os
-os.environ["HF_HUB_OFFLINE"] = "1"
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 print("Importing transformers to prevent Windows Rust deadlock...")
 import transformers

@@ -3,7 +3,6 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 import sys
 import os
 
-os.environ["HF_HUB_OFFLINE"] = "1"
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from data_utils import get_harmful_prompts, apply_chat_template
 
@@ -18,7 +17,7 @@ def run_level3():
         torch_dtype=torch.float16
     )
     
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    base_dir = os.environ.get('OUTPUT_DIR', os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     r_hat_path = os.path.join(base_dir, 'models', 'r_hat_level0.pt')
     r_hat = torch.load(r_hat_path).to(torch.float16).to(model.device)
     

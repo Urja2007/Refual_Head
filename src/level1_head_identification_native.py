@@ -8,22 +8,21 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import cross_val_score
 from tqdm import tqdm
 
-os.environ["HF_HUB_OFFLINE"] = "1"
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from data_utils import get_harmful_prompts, get_harmless_prompts, apply_chat_template
 
 def run_level1_native():
     print("Loading Llama-3-8B-Instruct natively...")
-    tokenizer = AutoTokenizer.from_pretrained("meta-llama/Meta-Llama-3-8B-Instruct")
+    tokenizer = AutoTokenizer.from_pretrained(os.environ.get("TARGET_MODEL", "meta-llama/Meta-Llama-3-8B-Instruct"))
     tokenizer.pad_token = tokenizer.eos_token
     
     model = AutoModelForCausalLM.from_pretrained(
-        "meta-llama/Meta-Llama-3-8B-Instruct",
+        os.environ.get("TARGET_MODEL", "meta-llama/Meta-Llama-3-8B-Instruct"),
         device_map="auto",
         torch_dtype=torch.float16
     )
     
-    r_hat_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'models', 'r_hat_level0.pt')
+    r_hat_path = os.path.join(os.environ.get('OUTPUT_DIR', os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'models', 'r_hat_level0.pt')
     if not os.path.exists(r_hat_path):
         print(f"Error: {r_hat_path} not found. Run Level 0 first.")
         return
@@ -159,7 +158,7 @@ def run_level1_native():
         "morality_cops": morality_cops
     }
     
-    results_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'results')
+    results_dir = os.path.join(os.environ.get('OUTPUT_DIR', os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'results')
     os.makedirs(results_dir, exist_ok=True)
     with open(os.path.join(results_dir, 'level1_top_heads.json'), 'w') as f:
         json.dump(results, f, indent=2)

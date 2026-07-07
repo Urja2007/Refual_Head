@@ -5,23 +5,22 @@ import os
 import json
 from tqdm import tqdm
 
-os.environ["HF_HUB_OFFLINE"] = "1"
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from data_utils import get_harmful_prompts, get_harmless_prompts, apply_chat_template
 
 def run_level4():
     print("Loading Llama-3-8B-Instruct natively for Level 4 Mechanism Attribution...")
-    tokenizer = AutoTokenizer.from_pretrained("meta-llama/Meta-Llama-3-8B-Instruct")
+    tokenizer = AutoTokenizer.from_pretrained(os.environ.get("TARGET_MODEL", "meta-llama/Meta-Llama-3-8B-Instruct"))
     tokenizer.pad_token = tokenizer.eos_token
     
     model = AutoModelForCausalLM.from_pretrained(
-        "meta-llama/Meta-Llama-3-8B-Instruct",
+        os.environ.get("TARGET_MODEL", "meta-llama/Meta-Llama-3-8B-Instruct"),
         device_map="auto",
         torch_dtype=torch.float16
     )
     
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    r_hat_path = os.path.join(base_dir, 'models', 'r_hat_level0.pt')
+    base_dir = os.environ.get('OUTPUT_DIR', os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    r_hat_path = os.path.join(os.environ.get('OUTPUT_DIR', base_dir), 'models', 'r_hat_level0.pt')
     r_hat = torch.load(r_hat_path).to(torch.float32).to(model.device)
     r_hat_norm = r_hat / torch.norm(r_hat)
     
@@ -63,7 +62,7 @@ def run_level4():
     h_hat = harmful_mean - harmless_mean
     h_hat_norm = h_hat / torch.norm(h_hat)
     
-    torch.save(h_hat_norm, os.path.join(base_dir, 'models', 'h_hat_level4.pt'))
+    torch.save(h_hat_norm, os.path.join(os.environ.get('OUTPUT_DIR', base_dir), 'models', 'h_hat_level4.pt'))
     print("Saved h_hat to models/h_hat_level4.pt")
     
     # ---------------------------------------------------------
@@ -122,7 +121,7 @@ def run_level4():
     for n in anti_erasure_neurons[:10]:
         print(f"Layer {n['layer']} Neuron {n['neuron_idx']}: Score={n['score']:.4f} (In: {n['in_corr']:.4f}, Out: {n['out_corr']:.4f})")
         
-    results_dir = os.path.join(base_dir, 'results')
+    results_dir = os.path.join(os.environ.get('OUTPUT_DIR', base_dir), 'results')
     with open(os.path.join(results_dir, 'level4_anti_erasure.json'), 'w') as f:
         json.dump(anti_erasure_neurons, f, indent=2)
 

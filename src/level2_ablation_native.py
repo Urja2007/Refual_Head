@@ -5,26 +5,25 @@ import os
 import json
 from collections import defaultdict
 
-os.environ["HF_HUB_OFFLINE"] = "1"
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from data_utils import get_harmful_prompts, apply_chat_template
 
 def run_level2_native():
     print("Loading Llama-3-8B-Instruct natively for Generation...")
-    tokenizer = AutoTokenizer.from_pretrained("meta-llama/Meta-Llama-3-8B-Instruct")
+    tokenizer = AutoTokenizer.from_pretrained(os.environ.get("TARGET_MODEL", "meta-llama/Meta-Llama-3-8B-Instruct"))
     tokenizer.pad_token = tokenizer.eos_token
     
     model = AutoModelForCausalLM.from_pretrained(
-        "meta-llama/Meta-Llama-3-8B-Instruct",
+        os.environ.get("TARGET_MODEL", "meta-llama/Meta-Llama-3-8B-Instruct"),
         device_map="auto",
         torch_dtype=torch.float16
     )
     
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    r_hat_path = os.path.join(base_dir, 'models', 'r_hat_level0.pt')
+    base_dir = os.environ.get('OUTPUT_DIR', os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    r_hat_path = os.path.join(os.environ.get('OUTPUT_DIR', base_dir), 'models', 'r_hat_level0.pt')
     r_hat = torch.load(r_hat_path).to(torch.float16).to(model.device)
     
-    level1_path = os.path.join(base_dir, 'results', 'level1_top_heads.json')
+    level1_path = os.path.join(os.environ.get('OUTPUT_DIR', base_dir), 'results', 'level1_top_heads.json')
     with open(level1_path, 'r') as f:
         level1_data = json.load(f)
         
@@ -138,7 +137,7 @@ def run_level2_native():
     disable_ablation()
     
     # Save results
-    results_dir = os.path.join(base_dir, 'results')
+    results_dir = os.path.join(os.environ.get('OUTPUT_DIR', base_dir), 'results')
     os.makedirs(results_dir, exist_ok=True)
     with open(os.path.join(results_dir, 'level2_ablation_results.json'), 'w') as f:
         json.dump(results, f, indent=2)
