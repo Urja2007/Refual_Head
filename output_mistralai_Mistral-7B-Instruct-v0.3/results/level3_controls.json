@@ -1,0 +1,6 @@
+{
+  "baseline": 0.15,
+  "control_random_heads": 0.15,
+  "control_outside_band": 0.145,
+  "directional_ablation": 0.01
+}
