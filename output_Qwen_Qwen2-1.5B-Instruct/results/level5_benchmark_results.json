@@ -1,0 +1,50 @@
+{
+  "0.0": {
+    "refusal_rate": 0.885,
+    "ci_lower": 0.84,
+    "ci_upper": 0.925,
+    "mcnemar_p_value": 1.0,
+    "mcnemar_chi2": 0.0,
+    "cohens_h": 0.0
+  },
+  "0.25": {
+    "refusal_rate": 0.82,
+    "ci_lower": 0.765,
+    "ci_upper": 0.87,
+    "mcnemar_p_value": 0.0008740872112984756,
+    "mcnemar_chi2": 11.076923076923077,
+    "cohens_h": 0.18434288604202376
+  },
+  "0.5": {
+    "refusal_rate": 0.77,
+    "ci_lower": 0.71,
+    "ci_upper": 0.825,
+    "mcnemar_p_value": 4.489784498638631e-06,
+    "mcnemar_chi2": 21.043478260869566,
+    "cohens_h": 0.30840404226865736
+  },
+  "0.75": {
+    "refusal_rate": 0.675,
+    "ci_lower": 0.61,
+    "ci_upper": 0.74,
+    "mcnemar_p_value": 2.508860953006117e-10,
+    "mcnemar_chi2": 40.023809523809526,
+    "cohens_h": 0.521270048023069
+  },
+  "1.0": {
+    "refusal_rate": 0.6,
+    "ci_lower": 0.53,
+    "ci_upper": 0.665,
+    "mcnemar_p_value": 1.194587564068435e-13,
+    "mcnemar_chi2": 55.01754385964912,
+    "cohens_h": 0.6774832308782486
+  },
+  "1.5": {
+    "refusal_rate": 0.41,
+    "ci_lower": 0.345,
+    "ci_upper": 0.475,
+    "mcnemar_p_value": 5.201694611862417e-22,
+    "mcnemar_chi2": 93.01052631578948,
+    "cohens_h": 1.059827602915127
+  }
+}

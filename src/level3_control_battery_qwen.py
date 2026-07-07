@@ -85,8 +85,11 @@ def run_level3():
 
     # Mode 2: Control 3 (Outside Band) -> Ablate 15 heads in layers 25-30
     def enable_control_outside():
+        disable_ablation()
+        max_layer = model.config.num_hidden_layers - 1
+        start_layer = int(max_layer * 0.8)
         random.seed(42)
-        outside_heads = [(random.randint(25, 30), random.randint(0, num_heads-1)) for _ in range(15)]
+        outside_heads = [(random.randint(start_layer, max_layer), random.randint(0, num_heads-1)) for _ in range(15)]
         layer_dict = {}
         for l, h in outside_heads:
             if l not in layer_dict: layer_dict[l] = {}

@@ -1,0 +1,11 @@
+{
+  "baseline": {
+    "refusal_rate": 0.005
+  },
+  "core_only": {
+    "refusal_rate": 0.01
+  },
+  "sniper_dual": {
+    "refusal_rate": 0.01
+  }
+}
